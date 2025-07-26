@@ -1,0 +1,21 @@
+{
+  "gui.simpleautoclicker.title": "Простой АвтоКликер",
+  "gui.simpleautoclicker.field.name": "Название",
+  "gui.simpleautoclicker.field.use_duration": "Время",
+  "gui.simpleautoclicker.label.interval": "Ждать",
+  "gui.simpleautoclicker.button.cancel": "Отмена",
+  "gui.simpleautoclicker.button.save": "Сохранить",
+  "gui.simpleautoclicker.button.enable": "Включено",
+  "gui.simpleautoclicker.button.delete": "Удалить",
+  "gui.simpleautoclicker.toggle.only_entity": "Сущности",
+  "gui.simpleautoclicker.toggle.cooldown_mode": "Кулдаун",
+  "category.simpleautoclicker": "Простой АвтоКликер",
+  "key.simpleautoclicker.toggle": "Переключить",
+  "key.simpleautoclicker.gui": "Граф. интерфейс",
+  "gui.simpleautoclicker.status": "АвтоКликер %s",
+  "gui.simpleautoclicker.status.on": "ВКЛ",
+  "gui.simpleautoclicker.status.off": "ВЫКЛ",
+  "gui.simpleautoclicker.action.use_item": "Использовать",
+  "gui.simpleautoclicker.action.attack": "Атаковать",
+  "gui.simpleautoclicker.field.features": "Особенности"
+}

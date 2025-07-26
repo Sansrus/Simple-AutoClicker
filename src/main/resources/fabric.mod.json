@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "id": "simple_autoclicker",
+  "version": "${version}",
+
+  "name": "Simple AutoClicker",
+  "description": "AutoClicker that clicks automatically!",
+  "authors": ["Sansrus"],
+  "contact": {},
+
+  "license": "All-Rights-Reserved",
+  "icon": "icon.png",
+
+  "environment": "*",
+  "entrypoints": {
+    "client": ["org.example.sansrus.simpleautoclicker.client.AutoClickerModClient"],
+    "main": ["org.example.sansrus.simpleautoclicker.AutoClickerMod"],
+    "modmenu": ["org.example.sansrus.simpleautoclicker.client.ModMenuIntegration"]
+  },
+
+  "mixins": [
+    "simple_autoclicker.mixins.json"
+    ,{
+      "config": "simple_autoclicker.client.mixins.json",
+      "environment": "client"
+    }
+  ],
+
+  "depends": {
+    "fabricloader": ">=${loader_version}",
+    "fabric": "*",
+    "minecraft": "${minecraft_version}",
+    "cloth-config": ">=19.0.147"
+  },
+  "suggests": {
+    "modmenu": ">=15.0.0-beta.3"
+  }
+}

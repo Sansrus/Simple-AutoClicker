@@ -1,0 +1,21 @@
+{
+  "gui.simpleautoclicker.title": "Simple AutoClicker",
+  "gui.simpleautoclicker.field.name": "Name",
+  "gui.simpleautoclicker.field.use_duration": "Use",
+  "gui.simpleautoclicker.label.interval": "Wait",
+  "gui.simpleautoclicker.button.cancel": "Cannel",
+  "gui.simpleautoclicker.button.save": "Save",
+  "gui.simpleautoclicker.button.enable": "Enable",
+  "gui.simpleautoclicker.button.delete": "Delete",
+  "gui.simpleautoclicker.toggle.only_entity": "EntityMod",
+  "gui.simpleautoclicker.toggle.cooldown_mode": "Cooldown",
+  "category.simpleautoclicker": "Simple AutoClicker",
+  "key.simpleautoclicker.toggle": "Toggle",
+  "key.simpleautoclicker.gui": "GUI",
+  "gui.simpleautoclicker.status": "AutoClicker %s",
+  "gui.simpleautoclicker.status.on": "ON",
+  "gui.simpleautoclicker.status.off": "OFF",
+  "gui.simpleautoclicker.action.use_item": "Use",
+  "gui.simpleautoclicker.action.attack": "Attack",
+  "gui.simpleautoclicker.field.features": "Features"
+}
