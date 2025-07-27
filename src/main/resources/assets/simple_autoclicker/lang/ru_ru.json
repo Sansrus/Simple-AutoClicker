@@ -17,5 +17,7 @@
   "gui.simpleautoclicker.status.off": "ВЫКЛ",
   "gui.simpleautoclicker.action.use_item": "Использовать",
   "gui.simpleautoclicker.action.attack": "Атаковать",
-  "gui.simpleautoclicker.field.features": "Особенности"
+  "gui.simpleautoclicker.field.features": "Особенности",
+  "gui.simpleautoclicker.action.right": "Вправо",
+  "gui.simpleautoclicker.action.left": "Влево"
 }

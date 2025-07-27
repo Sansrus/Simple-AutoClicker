@@ -53,8 +53,8 @@ public class AddKeyScreen extends Screen {
         switch (action) {
             case FORWARD:  return Text.translatable("key.forward");
             case BACKWARD: return Text.translatable("key.back");
-            case LEFT:     return Text.translatable("key.left");
-            case RIGHT:    return Text.translatable("key.right");
+            case LEFT:     return Text.translatable("gui.simpleautoclicker.action.left");
+            case RIGHT:    return Text.translatable("gui.simpleautoclicker.action.right");
             case JUMP:     return Text.translatable("key.jump");
             case SNEAK:    return Text.translatable("key.sneak");
             case USE_ITEM:return Text.translatable("gui.simpleautoclicker.action.use_item");

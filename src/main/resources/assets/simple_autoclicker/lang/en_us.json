@@ -17,5 +17,7 @@
   "gui.simpleautoclicker.status.off": "OFF",
   "gui.simpleautoclicker.action.use_item": "Use",
   "gui.simpleautoclicker.action.attack": "Attack",
-  "gui.simpleautoclicker.field.features": "Features"
+  "gui.simpleautoclicker.field.features": "Features",
+  "gui.simpleautoclicker.action.right": "Walk Right",
+  "gui.simpleautoclicker.action.left": "Walk Left"
 }
