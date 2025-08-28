@@ -6,7 +6,11 @@
   "name": "Simple AutoClicker",
   "description": "AutoClicker that clicks automatically!",
   "authors": ["Sansrus"],
-  "contact": {},
+  "contact": {
+    "homepage": "https://github.com/Sansrus/Simple-AutoClicker",
+    "sources": "https://github.com/Sansrus/Simple-AutoClicker",
+    "issues": "https://github.com/Sansrus/Simple-AutoClicker/issues"
+  },
 
   "license": "All-Rights-Reserved",
   "icon": "icon.png",
@@ -29,10 +33,11 @@
   "depends": {
     "fabricloader": ">=${loader_version}",
     "fabric": "*",
-    "minecraft": "${minecraft_version}",
-    "cloth-config": ">=19.0.147"
+    "minecraft": ">=${minecraft_version}"
+
   },
   "suggests": {
-    "modmenu": ">=15.0.0-beta.3"
+    "modmenu": ">=14.0.0-rc.2",
+    "cloth-config": ">=18.0.145"
   }
 }
