@@ -5,7 +5,11 @@ import com.terraformersmc.modmenu.api.ModMenuApi;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
+import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.option.KeyBinding;
+import net.minecraft.client.render.RenderTickCounter;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
@@ -25,6 +29,7 @@ public class AutoClickerModClient implements ClientModInitializer {
 
         new AutoClickerManager();
 
+        HudRenderCallback.EVENT.register(this::renderHud);
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             while (TOGGLE_KEY.wasPressed()) {
                 cfg.globalEnabled = !cfg.globalEnabled;
@@ -49,5 +54,19 @@ public class AutoClickerModClient implements ClientModInitializer {
                 client.setScreen(new AutoClickerListScreen(null));
             }
         });
+    }
+
+    private void renderHud(DrawContext drawContext, RenderTickCounter renderTickCounter) {
+        MinecraftClient client = MinecraftClient.getInstance();
+        if (client.world == null || client.player == null) return;
+        boolean on = cfg.globalEnabled;
+
+        if (on) {
+            Text onText = Text.translatable("gui.simpleautoclicker.status.on").formatted(Formatting.GREEN);
+            Text fullText = Text.translatable("gui.simpleautoclicker.status", onText);
+            int x = 5;
+            int y = client.getWindow().getScaledHeight() - 10; // левый нижний угол
+            drawContext.drawTextWithShadow(client.textRenderer, fullText, x, y, 0xFFFFFFFF);
+        }
     }
 }

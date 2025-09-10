@@ -12,6 +12,7 @@ import net.minecraft.util.hit.EntityHitResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Method;
@@ -20,6 +21,7 @@ import java.util.Optional;
 public class AutoClickerManager {
     private final MinecraftClient client = MinecraftClient.getInstance();
     private final AutoClickerConfig cfg = AutoClickerConfig.getInstance();
+    private final static Logger LOGGER = LoggerFactory.getLogger("AutoClickManager");
 
     // Переменные для отслеживания состояния импульсного нажатия
     private boolean needsAttackPress = false;
@@ -64,6 +66,7 @@ public class AutoClickerManager {
                 if (!onlyEntity || hasEntity) {
                     if (client.player.getAttackCooldownProgress(0.0F) >= 1.0F) {
                         performAttack(targetInfo);
+                        AutoClickerManager.playHandSwing(client, Hand.MAIN_HAND, true);
                     }
                 }
                 continue;
@@ -86,9 +89,13 @@ public class AutoClickerManager {
                 }
 
                 if (spam) {
-                    performAttack(targetInfo);
-                    e.pressed = true;
-                    if (hasBlock) {
+                    if (performAttack(targetInfo)) {
+                        e.pressed = true;
+                    } else {
+                        // если целью был entity, но кулдаун не готов -> не помечаем pressed
+                        e.pressed = false;
+                    }
+                    if (hasBlock && isBreakingBlock) {
                         continueBreaking();
                     }
                 } else {
@@ -108,7 +115,10 @@ public class AutoClickerManager {
             // ——— ОБЫЧНЫЙ РЕЖИМ (можно бить и сущности, и блоки) ———
             if (spam) {
                 performAttack(targetInfo);
-                e.pressed = true;
+                AutoClickerManager.playHandSwing(client, Hand.MAIN_HAND, true);
+                if (performAttack(targetInfo)) {
+                    e.pressed = true;
+                }
                 if (targetInfo.hasBlock()) {
                     continueBreaking();
                 }
@@ -116,6 +126,7 @@ public class AutoClickerManager {
                 e.tickCounter++;
                 if (!e.pressed && e.tickCounter >= e.intervalTicks) {
                     performAttack(targetInfo);
+                    AutoClickerManager.playHandSwing(client, Hand.MAIN_HAND, true);
                     e.pressed = true;
                     e.tickCounter = 0;
                 } else if (e.pressed && e.tickCounter >= e.useDurationTicks) {
@@ -152,11 +163,13 @@ public class AutoClickerManager {
      * — сбрасываем свои флаги и прерываем ломание, но НЕ сбрасываем attackKey.
      */
     private void simpleReset() {
+        if (client.player == null) return;
         for (AutoClickerConfig.Entry e : cfg.entries) {
             e.pressed = false;
             e.tickCounter = 0;
         }
         stopBlockIfNeeded();
+        client.player.stopUsingItem();
     }
 
     /**
@@ -172,114 +185,120 @@ public class AutoClickerManager {
 
 
     /**
-     * Выполняет мгновенную атаку по сущности или начало ломания блока на сервере.
+     * Попытаться выполнить атаку (по сущности) или начать ломание блока.
+     * Возвращает true, если действие действительно выполнено (пакет/вызов отправлен / ломание начато).
      */
-    private void performAttack(TargetInfo targetInfo) {
+    private boolean performAttack(TargetInfo targetInfo) {
         if (client.world == null || client.player == null || client.interactionManager == null) {
-            return;
+            return false;
         }
 
-        // Атакуем сущность
+        // Если есть сущность — требуем готовность атаки (кулдаун)
         if (targetInfo.hasEntity()) {
-            client.interactionManager.attackEntity(
-                    client.player,
-                    targetInfo.entityHitResult.getEntity()
-            );
-            // Отменяем любое текущее ломание блока
+            // Проверяем прогресс кулдауна орудия/руки — требуется >= 1.0
+            if (client.player.getAttackCooldownProgress(0.0F) < 1.0F) {
+                return false;
+            }
+
+            client.interactionManager.attackEntity(client.player, targetInfo.entityHitResult.getEntity());
+            // локальная анимация + уведомить сервер (если нужно)
+            AutoClickerManager.playHandSwing(client, net.minecraft.util.Hand.MAIN_HAND, true);
+
+            // если было ломание — отменяем
             if (isBreakingBlock) {
-                client.interactionManager.cancelBlockBreaking();
+                if (client.interactionManager != null) client.interactionManager.cancelBlockBreaking();
                 isBreakingBlock = false;
                 lastBlockHit = null;
             }
-            return;
+            return true;
         }
 
-        // Начинаем ломание блока
+        // Если есть блок — начать ломание (attackBlock) — не зависит от attack cooldown
         if (targetInfo.hasBlock()) {
             BlockHitResult bhr = targetInfo.blockHitResult;
-            client.interactionManager.attackBlock(
-                    bhr.getBlockPos(),
-                    bhr.getSide()
-            );
+            client.interactionManager.attackBlock(bhr.getBlockPos(), bhr.getSide());
             isBreakingBlock = true;
-            lastBlockHit   = bhr;
-            return;
+            lastBlockHit = bhr;
+            // Мах рукой/информирование сервера полезно при ломании
+            AutoClickerManager.playHandSwing(client, net.minecraft.util.Hand.MAIN_HAND, true);
+            return true;
         }
+
+        return false;
     }
+
 
     private void handleNonAttack(AutoClickerConfig.Entry e, MinecraftClient client) {
         boolean spam = e.spamMode || e.intervalTicks == 0;
+
+        // Если это спам — держим/повторяем
         if (spam) {
             press(e);
-            e.pressed = true;
-        } else {
-            e.tickCounter++;
-            if (!e.pressed && e.tickCounter >= e.intervalTicks) {
-                press(e);
-                e.pressed     = true;
-                e.tickCounter = 0;
-            } else if (e.pressed && e.tickCounter >= e.useDurationTicks) {
+            if (isHoldAction(e.action)) {
+                // удерживаемое действие — помечаем как удержание
+                e.pressed = true;
+            } else {
+                // одноразовое действие — сразу отпускаем, не помечаем как удержание
                 release(e);
-                e.pressed     = false;
-                e.tickCounter = 0;
+                e.pressed = false;
             }
+            return;
+        }
+
+        // Интервальный режим
+        e.tickCounter++;
+        if (!e.pressed && e.tickCounter >= e.intervalTicks) {
+            // Сработал интервал — нажимаем
+            press(e);
+
+            if (isHoldAction(e.action)) {
+                // помечаем как удержание и начнём считать useDurationTicks
+                e.pressed = true;
+            } else {
+                // одноразовое — сразу отпускаем
+                release(e);
+                e.pressed = false;
+            }
+            e.tickCounter = 0;
+        } else if (e.pressed && e.tickCounter >= e.useDurationTicks) {
+            // Завершаем удержание
+            release(e);
+            e.pressed = false;
+            e.tickCounter = 0;
         }
     }
 
+    /**
+     * Возвращает true, если действие должно обрабатываться как удержание (hold),
+     * т.е. press() -> пометить pressed=true и позже release() после useDurationTicks.
+     *
+     * Вредные/одноразовые действия: DROP, PICK_BLOCK, SWAP_HANDS, HOTBAR_*, TOGGLE_PERSPECTIVE, SCREENSHOT.
+     * Удерживаемые: движение, прыжок, приседание, использование предмета, бег (если используется).
+     */
+    private boolean isHoldAction(AutoClickAction action) {
+        return switch (action) {
+            case FORWARD, BACKWARD, LEFT, RIGHT,
+                 JUMP, SNEAK, USE_ITEM, SPRINT, ATTACK -> true;
+            default -> false;
+        };
+    }
+
+
+
     private void press(AutoClickerConfig.Entry e) {
         if (e.action == AutoClickAction.ATTACK) {
-            // Вся логика теперь в scheduleAttack и onTick
-        } else {
-            KeyBinding key = map(e.action);
-            if (key != null) key.setPressed(true);
+            // логика атаки отдельно
+            return;
         }
+        // вызываем реализацию, определённую в AutoClickAction
+        e.action.press(client);
     }
 
     private void release(AutoClickerConfig.Entry e) {
         if (e.action == AutoClickAction.ATTACK) {
-            // nothing
-        } else {
-            KeyBinding key = map(e.action);
-            if (key != null) key.setPressed(false);
+            return;
         }
-    }
-
-    private KeyBinding map(AutoClickAction action) {
-        return switch (action) {
-            case FORWARD -> client.options.forwardKey;
-            case BACKWARD -> client.options.backKey;
-            case LEFT -> client.options.leftKey;
-            case RIGHT -> client.options.rightKey;
-            case JUMP -> client.options.jumpKey;
-            case SNEAK -> client.options.sneakKey;
-            case USE_ITEM -> client.options.useKey;
-            default -> null;
-        };
-    }
-
-    private void resetAll() {
-        for (AutoClickerConfig.Entry e : cfg.entries) {
-            if (e.pressed) {
-                if (e.action != AutoClickAction.ATTACK) {
-                    KeyBinding key = map(e.action);
-                    if (key != null) key.setPressed(false);
-                }
-                e.pressed = false;
-                e.tickCounter = 0;
-            }
-        }
-        // Убедимся, что клавиша атаки отпущена
-        if (needsAttackPress || needsAttackRelease || client.options.attackKey.isPressed()) {
-            client.options.attackKey.setPressed(false);
-            needsAttackPress = false;
-            needsAttackRelease = false;
-        }
-        // Отменяем ломание блока при сбросе
-        if (client.interactionManager != null && isBreakingBlock) {
-            client.interactionManager.cancelBlockBreaking();
-        }
-        isBreakingBlock = false;
-        lastBlockHit = null;
+        e.action.release(client);
     }
 
     /**
@@ -300,9 +319,7 @@ public class AutoClickerManager {
                 lastBlockHit.getSide()
         );
         // 2) посылаем мах рукой — без этого сервер не «продолжит» ломать
-        client.player.networkHandler.sendPacket(
-                new HandSwingC2SPacket(Hand.MAIN_HAND)
-        );
+        AutoClickerManager.playHandSwing(client, Hand.MAIN_HAND, true);
     }
 
     // Вспомогательный класс для передачи информации о цели
@@ -375,5 +392,17 @@ public class AutoClickerManager {
         }
         // Удаляем perform, continueBreaking, resetBreaking, isBreakingBlock, lastBlockHit
         // так как их функционал перенесен в AutoClickerManager
+    }
+
+    public static void playHandSwing(MinecraftClient client, Hand hand, boolean notifyServer) {
+        if (client == null || client.player == null) return;
+
+        // Локальная анимация (будет видна сразу этому клиенту)
+        client.player.swingHand(hand);
+
+        // Уведомление сервера, чтобы другие клиенты увидели анимацию
+        if (notifyServer && client.getNetworkHandler() != null) {
+            client.getNetworkHandler().sendPacket(new HandSwingC2SPacket(hand));
+        }
     }
 }
