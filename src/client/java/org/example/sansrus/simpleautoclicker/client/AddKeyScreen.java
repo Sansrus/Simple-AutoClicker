@@ -92,7 +92,6 @@ public class AddKeyScreen extends Screen {
     @Override
     public void render(net.minecraft.client.gui.DrawContext context, int mouseX, int mouseY, float delta) {
         super.render(context, mouseX, mouseY, delta);
-        context.drawCenteredTextWithShadow(textRenderer, Text.literal("Choose action"), this.width / 2, 10, 0xFFFFFFFF);
 
         // Рисуем скроллбар (если нужно)
         final int itemHeight = 25;

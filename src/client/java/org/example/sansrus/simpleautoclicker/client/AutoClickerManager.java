@@ -2,7 +2,6 @@ package org.example.sansrus.simpleautoclicker.client;
 
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.option.KeyBinding;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.network.packet.c2s.play.HandSwingC2SPacket;
@@ -15,7 +14,6 @@ import net.minecraft.util.math.Vec3d;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.lang.reflect.Method;
 import java.util.Optional;
 
 public class AutoClickerManager {
@@ -23,9 +21,6 @@ public class AutoClickerManager {
     private final AutoClickerConfig cfg = AutoClickerConfig.getInstance();
     private final static Logger LOGGER = LoggerFactory.getLogger("AutoClickManager");
 
-    // Переменные для отслеживания состояния импульсного нажатия
-    private boolean needsAttackPress = false;
-    private boolean needsAttackRelease = false;
     // Переменные для отслеживания состояния ломания блока
     private boolean isBreakingBlock = false;
     private BlockHitResult lastBlockHit = null;
@@ -271,7 +266,6 @@ public class AutoClickerManager {
     /**
      * Возвращает true, если действие должно обрабатываться как удержание (hold),
      * т.е. press() -> пометить pressed=true и позже release() после useDurationTicks.
-     *
      * Вредные/одноразовые действия: DROP, PICK_BLOCK, SWAP_HANDS, HOTBAR_*, TOGGLE_PERSPECTIVE, SCREENSHOT.
      * Удерживаемые: движение, прыжок, приседание, использование предмета, бег (если используется).
      */

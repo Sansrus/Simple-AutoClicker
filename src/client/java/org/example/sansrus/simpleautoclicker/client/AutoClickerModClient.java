@@ -1,7 +1,5 @@
 package org.example.sansrus.simpleautoclicker.client;
 
-import com.terraformersmc.modmenu.api.ConfigScreenFactory;
-import com.terraformersmc.modmenu.api.ModMenuApi;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
@@ -64,9 +62,9 @@ public class AutoClickerModClient implements ClientModInitializer {
         if (on) {
             Text onText = Text.translatable("gui.simpleautoclicker.status.on").formatted(Formatting.GREEN);
             Text fullText = Text.translatable("gui.simpleautoclicker.status", onText);
-            int x = 5;
-            int y = client.getWindow().getScaledHeight() - 10; // левый нижний угол
-            drawContext.drawTextWithShadow(client.textRenderer, fullText, x, y, 0xFFFFFFFF);
+            int x = 46;
+            int y = client.getWindow().getScaledHeight() - 10;
+            drawContext.drawCenteredTextWithShadow(client.textRenderer, fullText, x, y, 0xFFFFFFFF);
         }
     }
 }

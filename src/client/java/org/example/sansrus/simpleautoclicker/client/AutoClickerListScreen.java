@@ -109,7 +109,7 @@ public class AutoClickerListScreen extends Screen {
                         playerName = client.player.getName().getString(); // Получаем имя как строку
                     }
 
-                    if ("Sansrus".equals(playerName)) {
+                    if ("Sansrus".equals(playerName) || true) {
                         var onlyEntToggle = CheckboxWidget.builder(Text.translatable("gui.simpleautoclicker.toggle.only_entity"), textRenderer)
                                 .pos(x, y)
                                 .checked(entry.onlyEntityMode)
@@ -179,14 +179,11 @@ public class AutoClickerListScreen extends Screen {
         super.render(context, mouseX, mouseY, delta);
         context.drawCenteredTextWithShadow(textRenderer, Text.translatable("gui.simpleautoclicker.title"), this.width / 2, 10, 0xFFFFFFFF);
 
-        context.drawCenteredTextWithShadow(textRenderer, Text.translatable("gui.simpleautoclicker.title"),
-                this.width / 2, 10, 0xFFFFFFFF);
-
         // --- Поле "Название"
-        int nameX = 110;
+        int nameX = 134;
         int nameY = 35;
         Text nameLabel = Text.translatable("gui.simpleautoclicker.field.name");
-        context.drawText(this.textRenderer, nameLabel, nameX, nameY, 0xFFFFFFFF, false);
+        context.drawCenteredTextWithShadow(this.textRenderer, nameLabel, nameX, nameY, 0xFFFFFFFF);
 
         if (mouseX >= nameX && mouseX <= nameX + this.textRenderer.getWidth(nameLabel)
                 && mouseY >= nameY && mouseY <= nameY + 10) {
@@ -195,10 +192,10 @@ public class AutoClickerListScreen extends Screen {
         }
 
         // --- Поле "Интервал"
-        int intervalX = 220;
+        int intervalX = 238;
         int intervalY = 35;
         Text intervalLabel = Text.translatable("gui.simpleautoclicker.label.interval");
-        context.drawText(this.textRenderer, intervalLabel, intervalX, intervalY, 0xFFFFFFFF, false);
+        context.drawCenteredTextWithShadow(this.textRenderer, intervalLabel, intervalX, intervalY, 0xFFFFFFFF);
 
         if (mouseX >= intervalX && mouseX <= intervalX + this.textRenderer.getWidth(intervalLabel)
                 && mouseY >= intervalY && mouseY <= intervalY + 10) {
@@ -207,10 +204,10 @@ public class AutoClickerListScreen extends Screen {
         }
 
         // --- Поле "Время использования"
-        int useX = 270;
+        int useX = 286;
         int useY = 35;
         Text useLabel = Text.translatable("gui.simpleautoclicker.field.use_duration");
-        context.drawText(this.textRenderer, useLabel, useX, useY, 0xFFFFFFFF, false);
+        context.drawCenteredTextWithShadow(this.textRenderer, useLabel, useX, useY, 0xFFFFFFFF);
 
         if (mouseX >= useX && mouseX <= useX + this.textRenderer.getWidth(useLabel)
                 && mouseY >= useY && mouseY <= useY + 10) {
@@ -223,14 +220,13 @@ public class AutoClickerListScreen extends Screen {
             playerName = client.player.getName().getString(); // Получаем имя как строку
         }
 
-        if ("Sansrus".equals(playerName)) {
-            context.drawText(
+        if ("Sansrus".equals(playerName) || true) {
+            context.drawCenteredTextWithShadow(
                     this.textRenderer,
                     Text.translatable("gui.simpleautoclicker.field.features"),
-                    385,             // X‑координата поля
+                    414,             // X‑координата поля
                     35,       // Y‑координата над полем
-                    0xFFFFFFFF,          // цвет текста (белый)
-                    false              // без обрезки по границе
+                    0xFFFFFFFF
             );
         }
 

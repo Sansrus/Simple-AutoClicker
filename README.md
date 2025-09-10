@@ -11,10 +11,18 @@ Actions that an autoclicker can perform instead of the player:
 - Sneak
 - Use Item
 - Attack entity/Break blocks
+- Sptint
+- Drop
+- Pick Block
+- Change the item in the second hand
+- Sreenshot
+- Toggle Perspective
+- Any of the nine hotbar slots
+
 
 # How to use the mod?
 You can open the mod's config through modmenu or in the game by pressing F4.
-In the config, you can customize the operation of a separate auto-click. 
+In the config, you can customize the operation of a separate auto-click.
 You can change:
 - Autoclick functionality (enable or disable)
 - Autoclick name
