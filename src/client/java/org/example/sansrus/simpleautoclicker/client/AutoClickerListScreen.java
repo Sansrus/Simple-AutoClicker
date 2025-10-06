@@ -109,7 +109,7 @@ public class AutoClickerListScreen extends Screen {
                         playerName = client.player.getName().getString(); // Получаем имя как строку
                     }
 
-                    if ("Sansrus".equals(playerName) || true) {
+                    if ("Sansrus".equals(playerName)) {
                         var onlyEntToggle = CheckboxWidget.builder(Text.translatable("gui.simpleautoclicker.toggle.only_entity"), textRenderer)
                                 .pos(x, y)
                                 .checked(entry.onlyEntityMode)
@@ -220,7 +220,7 @@ public class AutoClickerListScreen extends Screen {
             playerName = client.player.getName().getString(); // Получаем имя как строку
         }
 
-        if ("Sansrus".equals(playerName) || true) {
+        if ("Sansrus".equals(playerName)) {
             context.drawCenteredTextWithShadow(
                     this.textRenderer,
                     Text.translatable("gui.simpleautoclicker.field.features"),

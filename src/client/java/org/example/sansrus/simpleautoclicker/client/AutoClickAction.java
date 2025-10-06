@@ -8,6 +8,7 @@ import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.ScreenshotRecorder;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.item.*;
 import net.minecraft.network.packet.c2s.play.*;
@@ -32,10 +33,12 @@ public enum AutoClickAction {
 
         // Всегда разрешаем в креативе / если у игрока включён режим полёта
         // (creativeMode / allowFlying — дублирующие проверки на разные mappings)
-        if (p.isCreative() || (p.getAbilities() != null && p.getAbilities().allowFlying)) {
-            p.jump();
-            return;
-        }
+        try {
+            if (p.isCreative() || (p.getAbilities() != null && p.getAbilities().allowFlying)) {
+                p.jump();
+                return;
+            }
+        } catch (Throwable ignored) {}
 
         // Для выживания/приключения разрешаем прыжок только когда это законно:
         // - на земле
@@ -56,86 +59,106 @@ public enum AutoClickAction {
         }
     }),
 
-    SNEAK    (c -> {
-        ClientPlayerEntity p = c.player;
-        if (p != null) p.setSneaking(true);
+    SNEAK(c -> {
+        if (c != null && c.options != null) {
+            c.options.sneakKey.setPressed(true);
+        }
     }, c -> {
-        ClientPlayerEntity p = c.player;
-        if (p != null) p.setSneaking(false);
+        if (c != null && c.options != null) {
+            c.options.sneakKey.setPressed(false);
+        }
     }),
 
     USE_ITEM(
             c -> {
                 if (c == null || c.player == null || c.world == null || c.interactionManager == null) return;
-                Hand hand = c.player.getActiveHand();
-                var stack = c.player.getStackInHand(hand);
 
-                // 1) Сначала пробуем интеракт предметом в руке
-                ActionResult itemResult = c.interactionManager.interactItem(c.player, hand);
-                if (itemResult == ActionResult.SUCCESS || itemResult == ActionResult.CONSUME) {
-                    // если началось удержание (еда/заряд) — держим keyUse
-                    if (c.options != null && c.options.useKey != null) c.options.useKey.setPressed(true);
-                    return;
-                }
+                // Попробуем обе руки: сначала главную, потом вторую
+                for (Hand hand : Hand.values()) {
+                    var stack = c.player.getStackInHand(hand);
 
-                // 2) Делам рейкаст
-                double reach = c.player.getAttributeValue(EntityAttributes.ENTITY_INTERACTION_RANGE);
-                HitResult hr = c.player.raycast(reach, 0.0F, true);
-                switch (hr) {
-                    case null -> {
-                        // фолбэк: можно держать use в воздухе
-                        if (c.options != null && c.options.useKey != null) c.options.useKey.setPressed(true);
-                        return;
+                    // Пропускаем пустую руку
+                    if (stack.isEmpty()) continue;
+
+                    // 1) Пробуем интеракт предметом в руке
+                    ActionResult itemResult = c.interactionManager.interactItem(c.player, hand);
+                    if (itemResult == ActionResult.SUCCESS || itemResult == ActionResult.CONSUME) {
+                        if (c.options != null && c.options.useKey != null) {
+                            c.options.useKey.setPressed(true);
+                        }
+                        return; // Успешно использовали - выходим
                     }
 
+                    // 2) Делаем рейкаст
+                    double reach = c.player.getAttributeValue(EntityAttributes.ENTITY_INTERACTION_RANGE);
+                    HitResult hr = c.player.raycast(reach, 0.0F, true);
 
-                    // 3) Если попали в блок — проверяем опору для специальных предметов
-                    case BlockHitResult bhr -> {
-                        // место потенциальной установки/взаимодействия (та же логика, что вы использовали)
-                        BlockPos placePos = bhr.getBlockPos().offset(bhr.getSide());
-
-                        // если предмет требует опоры — проверяем hasSupport
-                        if (requiresSupport(stack.getItem())) {
-                            // Используем ваш метод hasSupport. Приводим world к ClientWorld, как он у вас определён
-                            if (!hasSupport((ClientWorld) c.world, placePos)) {
-                                // нет опоры — запрещаем действие
-                                return;
-                            }
+                    switch (hr) {
+                        case null -> {
+                            // Продолжаем цикл для второй руки
+                            continue;
                         }
 
-                        ActionResult blockResult = c.interactionManager.interactBlock(c.player, hand, bhr);
-                        if (blockResult == ActionResult.SUCCESS || blockResult == ActionResult.CONSUME) return;
-                        return;
-                    }
+                        // 3) Если попали в блок
+                        case BlockHitResult bhr -> {
+                            BlockPos placePos = bhr.getBlockPos().offset(bhr.getSide());
 
+                            // Проверка опоры для специальных предметов
+                            if (requiresSupport(stack.getItem())) {
+                                if (!hasSupport((ClientWorld) c.world, placePos)) {
+                                    continue; // Нет опоры - пробуем другую руку
+                                }
+                            }
 
-                    // 4) Если попали в сущность — пробуем интеракт по сущности
-                    case EntityHitResult ehr -> {
-                        ActionResult entResult = c.interactionManager.interactEntityAtLocation(c.player, ehr.getEntity(), ehr, hand);
-                        if (entResult == ActionResult.SUCCESS || entResult == ActionResult.CONSUME) return;
-                        return;
-                    }
-                    default -> {
+                            ActionResult blockResult = c.interactionManager.interactBlock(c.player, hand, bhr);
+                            if (blockResult == ActionResult.SUCCESS || blockResult == ActionResult.CONSUME) {
+                                if (c.options != null && c.options.useKey != null) {
+                                    c.options.useKey.setPressed(true);
+                                }
+                                return; // Успешно - выходим
+                            }
+                            // Не успешно - пробуем другую руку
+                            continue;
+                        }
+
+                        // 4) Если попали в сущность
+                        case EntityHitResult ehr -> {
+                            ActionResult entResult = c.interactionManager.interactEntityAtLocation(
+                                    c.player, ehr.getEntity(), ehr, hand
+                            );
+                            if (entResult == ActionResult.SUCCESS || entResult == ActionResult.CONSUME) {
+                                if (c.options != null && c.options.useKey != null) {
+                                    c.options.useKey.setPressed(true);
+                                }
+                                return; // Успешно - выходим
+                            }
+                            continue;
+                        }
+
+                        default -> {
+                            continue;
+                        }
                     }
                 }
 
-                // 5) Фолбэк: держим use
-                if (c.options != null && c.options.useKey != null) c.options.useKey.setPressed(true);
+                // 5) Если ничего не сработало - держим use как фолбэк
+                if (c.options != null && c.options.useKey != null) {
+                    c.options.useKey.setPressed(true);
+                }
             },
 
             // release: отпустить удержание use
             c -> {
                 if (c == null) return;
-                if (c.options != null && c.options.useKey != null) c.options.useKey.setPressed(false);
-                // не делаем force stopUsingItem/ручной RELEASE_USE_ITEM для заряжаемых — client отправит релиз корректно
+                if (c.options != null && c.options.useKey != null) {
+                    c.options.useKey.setPressed(false);
+                }
             }
     ),
 
     ATTACK(c -> {
         if (c.player == null || c.interactionManager == null) return;
         if (c.player.getAttackCooldownProgress(0.0F) < 1.0F) return;
-
-//        c.player.swingHand(c.player.getActiveHand());
 
         AutoClickerManager.playHandSwing(c, Hand.MAIN_HAND, true);
 

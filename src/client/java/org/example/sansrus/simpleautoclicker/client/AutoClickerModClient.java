@@ -15,9 +15,9 @@ import org.lwjgl.glfw.GLFW;
 
 public class AutoClickerModClient implements ClientModInitializer {
     public static final KeyBinding TOGGLE_KEY = new KeyBinding(
-            "key.simpleautoclicker.toggle", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_F8, "category.simpleautoclicker");
+            "key.simpleautoclicker.toggle", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_UNKNOWN, "category.simpleautoclicker");
     public static final KeyBinding GUI_KEY = new KeyBinding(
-            "key.simpleautoclicker.gui", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_F4, "category.simpleautoclicker");
+            "key.simpleautoclicker.gui", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_UNKNOWN, "category.simpleautoclicker");
     private final AutoClickerConfig cfg = AutoClickerConfig.getInstance();
 
     @Override
