@@ -122,7 +122,6 @@ public class AutoClickerManager {
 
             // ——— ОБЫЧНЫЙ РЕЖИМ (можно бить и сущности, и блоки) ———
             if (spam) {
-                performAttack(targetInfo);
                 AutoClickerManager.playHandSwing(client, Hand.MAIN_HAND, true);
                 if (performAttack(targetInfo)) {
                     e.pressed = true;
@@ -153,140 +152,6 @@ public class AutoClickerManager {
             }
         }
     }
-
-//    /**
-//     * Полный сброс: и внутренние флаги, и сброс нажатий всех клавиш (использовался до этого).
-//     */
-//    private void fullReset() {
-//        if (client == null) return;
-//
-//        // 1) Сбрасываем все записи конфигурации полностью
-//        for (AutoClickerConfig.Entry e : cfg.entries) {
-//            if (e == null) continue;
-//            // Вызываем release на всякий случай (чтобы enum отпустил клавиши)
-//            try {
-//                if (e.action != null) e.action.release(client);
-//            } catch (Exception ignored) {}
-//
-//            e.pressed = false;
-//            e.tickCounter = 0;
-//        }
-//
-//        // 2) Останавливаем ломание блока
-//        stopBlockIfNeeded();
-//
-//        // 3) Принудительно отпускаем все известные клавиши (как в simpleReset, но тут делаем полностью)
-//        if (client.options != null) {
-//            try { if (client.options.forwardKey != null) client.options.forwardKey.setPressed(false); } catch (Throwable ignored) {}
-//            try { if (client.options.backKey != null) client.options.backKey.setPressed(false); } catch (Throwable ignored) {}
-//            try { if (client.options.leftKey != null) client.options.leftKey.setPressed(false); } catch (Throwable ignored) {}
-//            try { if (client.options.rightKey != null) client.options.rightKey.setPressed(false); } catch (Throwable ignored) {}
-//            try { if (client.options.jumpKey != null) client.options.jumpKey.setPressed(false); } catch (Throwable ignored) {}
-//            try { if (client.options.sneakKey != null) client.options.sneakKey.setPressed(false); } catch (Throwable ignored) {}
-//            try { if (client.options.useKey != null) client.options.useKey.setPressed(false); } catch (Throwable ignored) {}
-//            try { if (client.options.dropKey != null) client.options.dropKey.setPressed(false); } catch (Throwable ignored) {}
-//            try { if (client.options.sprintKey != null) client.options.sprintKey.setPressed(false); } catch (Throwable ignored) {}
-//            try { if (client.options.pickItemKey != null) client.options.pickItemKey.setPressed(false); } catch (Throwable ignored) {}
-//            try { if (client.options.swapHandsKey != null) client.options.swapHandsKey.setPressed(false); } catch (Throwable ignored) {}
-//            try { if (client.options.togglePerspectiveKey != null) client.options.togglePerspectiveKey.setPressed(false); } catch (Throwable ignored) {}
-//            try { if (client.options.screenshotKey != null) client.options.screenshotKey.setPressed(false); } catch (Throwable ignored) {}
-//
-//            // Хотбар
-//            try {
-//                if (client.options.hotbarKeys != null) {
-//                    for (KeyBinding kb : client.options.hotbarKeys) {
-//                        if (kb != null) kb.setPressed(false);
-//                    }
-//                }
-//            } catch (Throwable ignored) {}
-//
-//            // Общий массив клавиш (если есть)
-//            try {
-//                if (client.options.allKeys != null) {
-//                    for (KeyBinding kb : client.options.allKeys) {
-//                        if (kb != null) kb.setPressed(false);
-//                    }
-//                }
-//            } catch (Throwable ignored) {}
-//        }
-//
-//        // 4) Сбрасываем состояние клавиши атаки и связанные флаги
-//        try { if (client.options != null && client.options.attackKey != null) client.options.attackKey.setPressed(false); } catch (Throwable ignored) {}
-//
-//        // 5) Если игрок использовал предмет — безопасно остановить использование (fullReset — "жёсткий" сброс)
-//        try {
-//            if (client.player != null) client.player.stopUsingItem();
-//        } catch (Throwable ignored) {}
-//    }
-//
-//
-//    /**
-//     * Упрощённый сброс при отключении мода:
-//     * — сбрасываем свои флаги и прерываем ломание, но НЕ сбрасываем attackKey.
-//     */
-//    private void simpleReset() {
-//        // Не трогаем stopUsingItem() здесь — simpleReset вызывается при отключении модa и
-//        // не должен ломать обычное удержание использования игрока в мире.
-//        if (client == null) return;
-//        if (client.player == null) return;
-//
-//        // 1) Сбрасываем внутренние флаги и вызываем release для действий, которые могли что-то держать
-//        for (AutoClickerConfig.Entry e : cfg.entries) {
-//            if (e == null) continue;
-//            // Если запись была в состоянии "pressed", вызовем release у её действия,
-//            // чтобы enum мог отпустить связанные KeyBinding'и / состояния.
-//            try {
-//                if (e.pressed && e.action != null) {
-//                    e.action.release(client);
-//                }
-//            } catch (Exception ignored) {}
-//
-//            // Сбрасываем флаги записи
-//            e.pressed = false;
-//            e.tickCounter = 0;
-//        }
-//
-//        // 2) Отменяем ломание блока, если оно было
-//        stopBlockIfNeeded();
-//
-//        // 3) Резервная принудительная отжатие известных клавиш (на случай, если enum-release не закрывал всё)
-//        if (client.options != null) {
-//            try { if (client.options.forwardKey != null) client.options.forwardKey.setPressed(false); } catch (Throwable ignored) {}
-//            try { if (client.options.backKey != null) client.options.backKey.setPressed(false); } catch (Throwable ignored) {}
-//            try { if (client.options.leftKey != null) client.options.leftKey.setPressed(false); } catch (Throwable ignored) {}
-//            try { if (client.options.rightKey != null) client.options.rightKey.setPressed(false); } catch (Throwable ignored) {}
-//            try { if (client.options.jumpKey != null) client.options.jumpKey.setPressed(false); } catch (Throwable ignored) {}
-//            try { if (client.options.sneakKey != null) client.options.sneakKey.setPressed(false); } catch (Throwable ignored) {}
-//            try { if (client.options.useKey != null) client.options.useKey.setPressed(false); } catch (Throwable ignored) {}
-//            try { if (client.options.dropKey != null) client.options.dropKey.setPressed(false); } catch (Throwable ignored) {}
-//            try { if (client.options.sprintKey != null) client.options.sprintKey.setPressed(false); } catch (Throwable ignored) {}
-//            try { if (client.options.pickItemKey != null) client.options.pickItemKey.setPressed(false); } catch (Throwable ignored) {}
-//            try { if (client.options.swapHandsKey != null) client.options.swapHandsKey.setPressed(false); } catch (Throwable ignored) {}
-//            try { if (client.options.togglePerspectiveKey != null) client.options.togglePerspectiveKey.setPressed(false); } catch (Throwable ignored) {}
-//            try { if (client.options.screenshotKey != null) client.options.screenshotKey.setPressed(false); } catch (Throwable ignored) {}
-//
-//            // Хотбар (если есть)
-//            try {
-//                if (client.options.hotbarKeys != null) {
-//                    for (KeyBinding kb : client.options.hotbarKeys) {
-//                        if (kb != null) kb.setPressed(false);
-//                    }
-//                }
-//            } catch (Throwable ignored) {}
-//
-//            // Попытка очистить общий массив клавиш, если он есть
-//            try {
-//                if (client.options.allKeys != null) {
-//                    for (KeyBinding kb : client.options.allKeys) {
-//                        if (kb != null) kb.setPressed(false);
-//                    }
-//                }
-//            } catch (Throwable ignored) {}
-//        }
-//
-//        // Не трогаем attackKey здесь (если не хотите), но можно гарантировать её состояние:
-//        try { if (client.options != null && client.options.attackKey != null) client.options.attackKey.setPressed(false); } catch (Throwable ignored) {}
-//    }
 
     /**
      * Полный сброс: и внутренние флаги, и сброс нажатий всех клавиш (использовался до этого).
@@ -337,34 +202,43 @@ public class AutoClickerManager {
             return false;
         }
 
-        // Если есть сущность — требуем готовность атаки (кулдаун)
         if (targetInfo.hasEntity()) {
-            // Проверяем прогресс кулдауна орудия/руки — требуется >= 1.0
             if (client.player.getAttackCooldownProgress(0.0F) < 1.0F) {
                 return false;
             }
-
             client.interactionManager.attackEntity(client.player, targetInfo.entityHitResult.getEntity());
-            // локальная анимация + уведомить сервер (если нужно)
-            AutoClickerManager.playHandSwing(client, net.minecraft.util.Hand.MAIN_HAND, true);
+            AutoClickerManager.playHandSwing(client, Hand.MAIN_HAND, true);
 
-            // если было ломание — отменяем
+            // Отменяем ломание блока при атаке entity
             if (isBreakingBlock) {
-                if (client.interactionManager != null) client.interactionManager.cancelBlockBreaking();
+                client.interactionManager.cancelBlockBreaking();
                 isBreakingBlock = false;
                 lastBlockHit = null;
             }
             return true;
         }
 
-        // Если есть блок — начать ломание (attackBlock) — не зависит от attack cooldown
         if (targetInfo.hasBlock()) {
             BlockHitResult bhr = targetInfo.blockHitResult;
-            client.interactionManager.attackBlock(bhr.getBlockPos(), bhr.getSide());
-            isBreakingBlock = true;
-            lastBlockHit = bhr;
-            // Мах рукой/информирование сервера полезно при ломании
-            AutoClickerManager.playHandSwing(client, net.minecraft.util.Hand.MAIN_HAND, true);
+
+            // ✅ ИСПРАВЛЕНИЕ: начинаем ломание только если ещё не начали,
+            // или если это другой блок
+            if (!isBreakingBlock || lastBlockHit == null ||
+                    !lastBlockHit.getBlockPos().equals(bhr.getBlockPos())) {
+
+                // Начинаем ломание нового блока
+                client.interactionManager.attackBlock(bhr.getBlockPos(), bhr.getSide());
+                isBreakingBlock = true;
+                lastBlockHit = bhr;
+            } else {
+                // Продолжаем ломание того же блока
+                client.interactionManager.updateBlockBreakingProgress(
+                        bhr.getBlockPos(),
+                        bhr.getSide()
+                );
+            }
+
+            AutoClickerManager.playHandSwing(client, Hand.MAIN_HAND, true);
             return true;
         }
 
@@ -497,7 +371,7 @@ public class AutoClickerManager {
                 return new TargetInfo(null, null);
             }
 
-            double reach = client.player.getAttributeValue(EntityAttributes.ENTITY_INTERACTION_RANGE);
+            double reach = client.player.getAttributeValue(EntityAttributes.BLOCK_INTERACTION_RANGE);
             Vec3d eyePos = client.player.getCameraPosVec(0.0F);
 
             // 1) Блоковый рэйкаст

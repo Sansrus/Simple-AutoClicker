@@ -11,6 +11,9 @@ public class AutoClickerListScreen extends Screen {
     private final Screen parent;
     private AutoClickerConfig config;
     private int scrollOffset = 0;
+    private int customXName = 134;
+    private int customXWait = 238;
+    private int customXUse = 286;
 
     public AutoClickerListScreen(Screen parent) {
         super(Text.translatable("gui.simpleautoclicker.title"));
@@ -40,7 +43,8 @@ public class AutoClickerListScreen extends Screen {
                         })
                         .build();
                 addDrawableChild(toggle);
-                x += 80 + spacing;  // 20px ширина + 20px отступ
+                x += 80 + spacing;
+                saveXName(x);
 
                 // 2) Поле «Название» (TextFieldWidget шириной 100px)
                 TextFieldWidget nameField = new TextFieldWidget(
@@ -55,6 +59,7 @@ public class AutoClickerListScreen extends Screen {
                 addDrawableChild(nameField);
                 addSelectableChild(nameField);
                 x += 90 + spacing;
+                saveXWait(x);
 
                 // 3) Интервал (TextFieldWidget шириной 40px)
                 TextFieldWidget intervalField = new TextFieldWidget(
@@ -71,6 +76,7 @@ public class AutoClickerListScreen extends Screen {
                 addDrawableChild(intervalField);
                 addSelectableChild(intervalField);
                 x += 30 + spacing;
+                saveXUse(x);
 
                 // 4) Таймер использования (TextFieldWidget шириной 40px)
                 TextFieldWidget useField = new TextFieldWidget(
@@ -180,22 +186,22 @@ public class AutoClickerListScreen extends Screen {
         context.drawCenteredTextWithShadow(textRenderer, Text.translatable("gui.simpleautoclicker.title"), this.width / 2, 10, 0xFFFFFFFF);
 
         // --- Поле "Название"
-        int nameX = 134;
+        int nameX = loadXName();
         int nameY = 35;
         Text nameLabel = Text.translatable("gui.simpleautoclicker.field.name");
-        context.drawCenteredTextWithShadow(this.textRenderer, nameLabel, nameX, nameY, 0xFFFFFFFF);
+        context.drawText(this.textRenderer, nameLabel, nameX, nameY, 0xFFFFFFFF, true);
 
-        if (mouseX >= nameX && mouseX <= nameX + this.textRenderer.getWidth(nameLabel)
+        if (mouseX>= nameX && mouseX <= nameX + this.textRenderer.getWidth(nameLabel)
                 && mouseY >= nameY && mouseY <= nameY + 10) {
             context.drawTooltip(this.textRenderer,
                     Text.translatable("gui.simpleautoclicker.tooltip.name"), mouseX, mouseY);
         }
 
         // --- Поле "Интервал"
-        int intervalX = 238;
+        int intervalX = loadXWait();
         int intervalY = 35;
         Text intervalLabel = Text.translatable("gui.simpleautoclicker.label.interval");
-        context.drawCenteredTextWithShadow(this.textRenderer, intervalLabel, intervalX, intervalY, 0xFFFFFFFF);
+        context.drawText(this.textRenderer, intervalLabel, intervalX, intervalY, 0xFFFFFFFF, true);
 
         if (mouseX >= intervalX && mouseX <= intervalX + this.textRenderer.getWidth(intervalLabel)
                 && mouseY >= intervalY && mouseY <= intervalY + 10) {
@@ -204,12 +210,12 @@ public class AutoClickerListScreen extends Screen {
         }
 
         // --- Поле "Время использования"
-        int useX = 286;
+        int useX = loadXUse();
         int useY = 35;
         Text useLabel = Text.translatable("gui.simpleautoclicker.field.use_duration");
-        context.drawCenteredTextWithShadow(this.textRenderer, useLabel, useX, useY, 0xFFFFFFFF);
+        context.drawText(this.textRenderer, useLabel, useX, useY, 0xFFFFFFFF, true);
 
-        if (mouseX >= useX && mouseX <= useX + this.textRenderer.getWidth(useLabel)
+        if (mouseX>= useX && mouseX <= useX + this.textRenderer.getWidth(useLabel)
                 && mouseY >= useY && mouseY <= useY + 10) {
             context.drawTooltip(this.textRenderer,
                     Text.translatable("gui.simpleautoclicker.tooltip.use_duration"), mouseX, mouseY);
@@ -240,5 +246,29 @@ public class AutoClickerListScreen extends Screen {
                 context.fill(this.width - 15, scrollBarY, this.width - 10, scrollBarY + scrollBarHeight, 0xFFFFFFFF);
             }
         }
+    }
+
+    private void saveXName(int x) {
+        customXName = x;
+    }
+
+    private int loadXName(){
+        return customXName;
+    }
+
+    private void saveXWait(int x) {
+        customXWait = x;
+    }
+
+    private int loadXWait(){
+        return customXWait;
+    }
+
+    private void saveXUse(int x) {
+        customXUse = x;
+    }
+
+    private int loadXUse(){
+        return customXUse;
     }
 }
