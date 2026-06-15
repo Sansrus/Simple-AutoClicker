@@ -1,0 +1,10 @@
+/.gradle/
+/.idea/
+/build/
+/run/
+/versions/26.1/.gradle/
+/versions/26.1/build/
+/versions/26.1/run/
+/versions/26.1/src/client/java/ru/sansrus/simple_autoclicker/client/L.java
+/versions/26.1/src/client/java/ru/sansrus/simple_autoclicker/client/X.java
+/versions/26.1/src/client/java/ru/sansrus/simple_autoclicker/mixin/client/M.java
