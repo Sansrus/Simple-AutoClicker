@@ -5,7 +5,7 @@ import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.network.protocol.game.ServerboundSwingPacket;
+import net.minecraft.network.protocol.game.ServerboundPunchPacket;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
@@ -439,10 +439,10 @@ public class AutoClickerManager {
     public static void playHandSwing(Minecraft client, InteractionHand hand, boolean notifyServer) {
         if (client == null || client.player == null) return;
 
-        client.player.swing(hand);
+        client.player.swing(hand, client.player.getItemInHand(hand).getAttackAnimation(), false);
 
         if (notifyServer && client.getConnection() != null) {
-            client.getConnection().send(new ServerboundSwingPacket(hand));
+            client.getConnection().send(ServerboundPunchPacket.INSTANCE);
         }
     }
 }

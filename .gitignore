@@ -8,3 +8,15 @@
 /versions/26.1/src/client/java/ru/sansrus/simple_autoclicker/client/L.java
 /versions/26.1/src/client/java/ru/sansrus/simple_autoclicker/client/X.java
 /versions/26.1/src/client/java/ru/sansrus/simple_autoclicker/mixin/client/M.java
+/versions/26.3/run/
+/versions/26.3/.gradle/
+/versions/26.3/build/
+/versions/26.2/.gradle/
+/versions/26.2/build/
+/versions/26.2/run/
+/versions/26.2/src/client/java/ru/sansrus/simple_autoclicker/mixin/client/M.java
+/versions/26.2/src/client/java/ru/sansrus/simple_autoclicker/client/X.java
+/versions/26.2/src/client/java/ru/sansrus/simple_autoclicker/client/L.java
+/versions/26.3/src/client/java/ru/sansrus/simple_autoclicker/client/X.java
+/versions/26.3/src/client/java/ru/sansrus/simple_autoclicker/client/L.java
+/versions/26.3/src/client/java/ru/sansrus/simple_autoclicker/mixin/client/M.java

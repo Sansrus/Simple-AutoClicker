@@ -43,7 +43,7 @@ dependencies {
     implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
 //    implementation "maven.modrinth:cloth-config:26.1.154+fabric"
-    implementation "maven.modrinth:modmenu:18.0.0-beta.1"
+    implementation "maven.modrinth:modmenu:${project.modmenu_version}"
 }
 
 processResources {
